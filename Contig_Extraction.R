@@ -1,4 +1,4 @@
-# This sceipt takes in viral reads hits as well as all contig sequences. Contig
+# This script takes in viral reads hits as well as all contig sequences. Contig
 # sequences are joined together, resulting in contig sequences only for contigs
 # that had viral hits. This enables me to save time by only re-blasting hits. 
 # I needed to re-BLAST hits because new more recent relatively were deposited to
