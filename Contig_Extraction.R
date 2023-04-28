@@ -1,6 +1,6 @@
-# This script takes in viral reads hits as well as all contig sequences. Contig
-# sequences are joined together, resulting in contig sequences only for contigs
-# that had viral hits. This enables me to save time by only re-blasting hits. 
+# This script takes in positive viral contig hits as well as all contig sequences. Contig
+# sequences are joined together with those with positive hits, resulting in contig sequences only for contigs
+# that had viral hits. This enables me to save time by only re-blasting contigs that are hits. 
 # I needed to re-BLAST hits because new more recent relatively were deposited to
 # GenBank which could impact BLAST results.
 
