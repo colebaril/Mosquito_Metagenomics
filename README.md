@@ -1,10 +1,10 @@
 # Mosquito Metagenomics
 
-Code and workflow for analyzing, summarizing, and tabulating mosquito metagenomics BLAST results (post-processing) for a manuscript. 
+Code and workflow for analyzing, summarizing, and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files for a manuscript. 
 
 [Dropbox link for raw assemblies](https://www.dropbox.com/s/m194auk7oxlpnwa/Contigs.zip?dl=0)
 
-# Pre-Processing 
+# Methods
 
 ## Host and Quality Filtering
 
