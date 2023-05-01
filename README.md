@@ -4,6 +4,22 @@ Code and workflow for analyzing, summarizing, and tabulating mosquito metagenomi
 
 [Dropbox link for raw assemblies](https://www.dropbox.com/s/m194auk7oxlpnwa/Contigs.zip?dl=0)
 
+# Re-BLAST 2023
+
+Due to the significant changes to GenBank we are re-BLASTing results. To speed things up, I am curating custom BLAST databases using sequences downloaded from GenBank's Nucleotide database using Entrez Queries to eliminate sequences that are extremely unlikely to be present in our samples that make up a large portion of the Nucleotide database. BLAST is being run locally using CLC Genomics Workbench. I am BLASTing by taxon categories (e.g., viruses, fungi, parasites) as we are limited by computational availability. For example, eliminating the top few viruses (unlikely to be found in mosquitoes) in the nucleotide database reduces the number of sequences by 90%. 
+
+## Viruses
+
+**Entrez Query:**
+
+Viruses [ORGN] NOT Coronavirus [ORGN] NOT Human immunodeficiency virus 1 [ORGN] NOT Influenza A virus [ORGN] NOT Hepacivirus C [ORGN] NOT Hepatitis B virus [ORGN] NOT Influenza B virus [ORGN] NOT Rotavirus A [ORGN] NOT Norwalk virus [ORGN] NOT Simian immunodeficiency virus [ORGN] 
+
+## Parasites 
+
+**Entrez Query:**
+
+Plasmodium [ORGN] OR Euglenozoa [ORGN] OR Trematoda [ORGN] OR Nematoda [ORGN] OR Acariformes [ORGN] OR Varroa [ORGN]
+
 # Methods
 
 ## Host and Quality Filtering
