@@ -4,6 +4,29 @@ Code and workflow for analyzing, summarizing, and tabulating mosquito metagenomi
 
 [Dropbox link for raw assemblies](https://www.dropbox.com/s/m194auk7oxlpnwa/Contigs.zip?dl=0)
 
+# May 07 Update
+
+- About half way through re-BLASTing on the virus data base. 
+
+- See up-to-date data [here](https://github.com/colebaril/Mosquito_Metagenomics/blob/main/virus_master_2023.csv)
+
+- See workflow, additional tables and charts [here](https://github.com/colebaril/Mosquito_Metagenomics/blob/main/Mosquito_Metagenomics.html)
+
+# To Do List
+
+- Finish virus blast
+
+- Non-virus BLAST?
+
+- Upload novel virus sequences to GenBank: need SRA database link to raw reads
+
+- Go through virus by virus when BLAST is complete (weekend of May 12)
+
+- Protein BLAST 
+
+- Create genome column
+
+
 # Re-BLAST 2023
 
 Due to the significant changes to GenBank we are re-BLASTing results. To speed things up, I am curating custom BLAST databases using sequences downloaded from GenBank's Nucleotide database using Entrez Queries to eliminate sequences that are extremely unlikely to be present in our samples that make up a large portion of the Nucleotide database. BLAST is being run locally using CLC Genomics Workbench. I am BLASTing by taxon categories (e.g., viruses, fungi, parasites) as we are limited by computational availability. For example, eliminating the top few viruses (unlikely to be found in mosquitoes) in the nucleotide database reduces the number of sequences by 90%. 
