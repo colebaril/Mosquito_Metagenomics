@@ -10,7 +10,7 @@ Code and workflow for analyzing, summarizing, and tabulating mosquito metagenomi
 
 - See up-to-date data [here](https://github.com/colebaril/Mosquito_Metagenomics/blob/main/virus_master_2023.csv)
 
-- See workflow, additional tables and charts [here](https://github.com/colebaril/Mosquito_Metagenomics/blob/main/Mosquito_Metagenomics.html)
+- See workflow, additional tables and charts [here](https://htmlpreview.github.io/?https://github.com/colebaril/Mosquito_Metagenomics/blob/main/Mosquito_Metagenomics.html)
 
 # To Do List
 
