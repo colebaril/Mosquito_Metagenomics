@@ -10,6 +10,8 @@ Some files generated are too large to store on GitHub (e.g., contig sequences, p
 
 [Dropbox link for figures](https://www.dropbox.com/sh/2lw74xdap2ofxtb/AAACTMIU-ipvd0GgKVGxuzjma?dl=0)
 
+Raw RNA sequencing reads can be retrieved from the NCBI short sequence read archive under the SRA accession number PRJNA793247.
+
 # May 07 Update
 
 - About half way through re-BLASTing on the virus data base. 
