@@ -2,7 +2,13 @@
 
 Code and workflow for analyzing, summarizing, and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files.
 
+# Links to Files
+
+Some files generated are too large to store on GitHub (e.g., contig sequences, publication-quality images). Large files can be accessed from DropBox folders below:
+
 [Dropbox link for raw assemblies](https://www.dropbox.com/s/m194auk7oxlpnwa/Contigs.zip?dl=0)
+
+[Dropbox link for figures](https://www.dropbox.com/sh/2lw74xdap2ofxtb/AAACTMIU-ipvd0GgKVGxuzjma?dl=0)
 
 # May 07 Update
 
