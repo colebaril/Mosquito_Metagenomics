@@ -14,28 +14,6 @@ Some files generated are too large to store on GitHub (e.g., contig sequences, p
 
 Raw RNA sequencing reads can be retrieved from the NCBI short sequence read archive under the SRA accession number PRJNA793247.
 
-# May 07 Update
-
-- About half way through re-BLASTing on the virus data base. 
-
-- See up-to-date data [here](https://github.com/colebaril/Mosquito_Metagenomics/blob/main/virus_master_2023.csv)
-
-- See workflow, additional tables and charts [here](https://htmlpreview.github.io/?https://github.com/colebaril/Mosquito_Metagenomics/blob/main/Mosquito_Metagenomics.html)
-
-# To Do List
-
-- Finish virus blast
-
-- Non-virus BLAST?
-
-- Upload novel virus sequences to GenBank: need SRA database link to raw reads
-
-- Go through virus by virus when BLAST is complete (weekend of May 12)
-
-- Protein BLAST 
-
-- Create genome column
-
 
 # Re-BLAST 2023
 
@@ -47,11 +25,9 @@ Due to the significant changes to GenBank we are re-BLASTing results. To speed t
 
 Viruses [ORGN] NOT Coronavirus [ORGN] NOT Human immunodeficiency virus 1 [ORGN] NOT Influenza A virus [ORGN] NOT Hepacivirus C [ORGN] NOT Hepatitis B virus [ORGN] NOT Influenza B virus [ORGN] NOT Rotavirus A [ORGN] NOT Norwalk virus [ORGN] NOT Simian immunodeficiency virus [ORGN] 
 
-## Parasites 
+# Non-Virus Sequences
 
-**Entrez Query:**
-
-Plasmodium [ORGN] OR Euglenozoa [ORGN] OR Trematoda [ORGN] OR Nematoda [ORGN] OR Acariformes [ORGN] OR Varroa [ORGN]
+Non-virus sequences (e.g., Fungi, parasites, bacteria, plants, vertebrates) were considerably lower in overall number as well as quality. Furthermore, for these reasons, it was difficult to discern species from the recovered sequences. Some of the reasons for this is that compared to viruses where often we recovered the near complete genome, for fungi, parasites, bacteria, plants and vertebrates we recovered mostly rRNA, mitochondrial sequences, or in the case of plants, chloroplast sequences. Therefore, we decided to conduct analyses for non-virus sequences recovered at a higher level (e.g., Family, Genus) rather than species. This still gives us a good idea about what organisms are harboured by mosquitoes. 
 
 # Methods
 
