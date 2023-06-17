@@ -8,7 +8,7 @@ Some files generated are too large to store on GitHub (e.g., contig sequences, p
 
 [Dropbox link to raw assemblies separated by sample](https://www.dropbox.com/s/m194auk7oxlpnwa/Contigs.zip?dl=0)
 
-[Dropbox link to raw assemblies concatenated into a .csv](https://www.dropbox.com/s/2khujpa8bn5w8k6/contigs_raw.zip?dl=0)
+[Dropbox link to raw assemblies concatenated into a .csv](https://www.dropbox.com/s/ppe83l8lbvdz262/contigs_raw.zip?dl=0)
 
 [Dropbox link to publication quality figures](https://www.dropbox.com/sh/2lw74xdap2ofxtb/AAACTMIU-ipvd0GgKVGxuzjma?dl=0)
 
