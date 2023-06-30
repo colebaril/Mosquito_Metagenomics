@@ -25,6 +25,16 @@ Due to the significant changes to GenBank we are re-BLASTing results. To speed t
 
 Viruses [ORGN] NOT Coronavirus [ORGN] NOT Human immunodeficiency virus 1 [ORGN] NOT Influenza A virus [ORGN] NOT Hepacivirus C [ORGN] NOT Hepatitis B virus [ORGN] NOT Influenza B virus [ORGN] NOT Rotavirus A [ORGN] NOT Norwalk virus [ORGN] NOT Simian immunodeficiency virus [ORGN] 
 
+## Re-BLAST 2023 Steps
+
+1. Concatenate all read mapping data and contigs: `01 - Mappings & Contigs.R`
+2. Re-BLAST all contig sequences against local NCBI virus blast (curated via above Entrez Query) using CLC
+3. Read local BLAST results and filter results: `02 - Read Nt Local BLAST.R`
+4. BLAST all contig sequences passing filters at NCBI against all organisms to eliminate false positives using CLC
+5. Read BLAST at NCBI results and filter out non-virus sequences: `03 - BLAST at NCBI.R`
+6. tBLASTx on contig sequences passing filters from step using local database on CLC to determine aa identites
+7. Read tBLASTx results and filter: `04 - tBLASTx.R`
+
 # Non-Virus Sequences
 
 Non-virus sequences (e.g., Fungi, parasites, bacteria, plants, vertebrates) were considerably lower in overall number as well as quality. Furthermore, for these reasons, it was difficult to discern species from the recovered sequences. Some of the reasons for this is that compared to viruses where often we recovered the near complete genome, for fungi, parasites, bacteria, plants and vertebrates we recovered mostly rRNA, mitochondrial sequences, or in the case of plants, chloroplast sequences. Therefore, we decided to conduct analyses for non-virus sequences recovered at a higher level (e.g., Family, Genus) rather than species. This still gives us a good idea about what organisms are harboured by mosquitoes. 
