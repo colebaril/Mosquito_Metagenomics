@@ -1,0 +1,360 @@
+---
+title: "Mosquito Metagenomics Summary"
+author: "Cole Baril"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    code_download: true
+    code_folding: show
+---
+
+```{css toc-content, echo = FALSE}
+#TOC {
+  left: 25px;
+  margin: 25px 0px 25px 0px;
+}
+
+.main-container {
+    margin-left: 50px;
+}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warnings = FALSE)
+```
+
+```{=html}
+<style>
+   table {
+     display: block;
+     overflow: auto;
+   }
+
+   blockquote {
+   background-color: #33638dff;
+   color:white;
+  }
+
+ </style>
+```
+
+
+# Libraries
+
+```{r, load_libraries, message = FALSE, warning = FALSE}
+require(pacman)
+pacman::p_load(tidyverse, janitor, here, DT, gt, phylotools, assertr, readxl, patchwork, reshape2, ggtext, openxlsx, grid, tiff)
+```
+
+# Load Data
+
+```{r, load_data, message = FALSE, warning = FALSE}
+virus_master_2023 <- read_csv(here("Data/tblastx_master.csv"))
+```
+
+# BLAST Summary
+
+```{r, read_contig_summary, message = FALSE, warning = FALSE}
+library_summary <- virus_master_2023 %>%
+  group_by(mosquito_species, sample_number) %>%
+  summarise(n = n_distinct(mosquito_species)) %>%
+  group_by(mosquito_species) %>%
+  summarise(n = n()) %>%
+  adorn_totals()
+
+years <- virus_master_2023 %>% 
+  group_by(collection_year, virus_name) %>% 
+  summarise(count = n_distinct(virus_name, collection_year)) %>% 
+  pivot_wider(names_from = collection_year, values_from = count, values_fill = 0)
+
+virus_lineage <- virus_master_2023 %>% 
+  group_by(virus_name, viral_family, genome) %>% 
+  summarise(n = n_distinct(virus_name, viral_family, genome)) %>% 
+  select(-"n")
+
+virus_master_2023 %>% 
+  group_by(virus_name) %>% 
+  summarise(n_contigs = n(),
+            mean_cov = mean(coverage),
+            min_cov = min(coverage),
+            max_cov = max(coverage),
+            mean_pid = mean(greatest_identity_percent),
+            med_pid = median(greatest_identity_percent),
+            min_pid = min(greatest_identity_percent),
+            max_pid = max(greatest_identity_percent),
+            total_reads = sum(total_read_count)) %>% 
+  left_join(virus_lineage, by = "virus_name") %>% 
+  group_by(genome, viral_family) %>% 
+  arrange(genome, viral_family) %>% 
+  relocate(total_reads, .after = "n_contigs") %>% 
+  mutate(across(.cols = "virus_name",
+                ~case_when(grepl("Manitoba", virus_name) & !grepl("Manitoba virus", virus_name) ~ 
+                             paste0(., "*"),
+                           TRUE ~ .))) %>% 
+  gt() %>% 
+  fmt_number(columns = mean_cov:max_pid,
+             decimals = 2) %>% 
+  fmt_number(columns = total_reads,
+             sep_mark = ",",
+             decimals = 0) %>% 
+  tab_spanner(label = "Coverage Depth", columns = c(mean_cov, min_cov, max_cov)) %>% 
+  tab_spanner(label = "aa Percent Identity", columns = c(mean_pid, min_pid, max_pid, med_pid)) %>% 
+  cols_label(
+    n_contigs = "Contigs",
+    total_reads = "Reads",
+    mean_cov = "Mean", min_cov = "Min", max_cov = "Max",
+    mean_pid = "Mean", min_pid = "Min", max_pid = "Max", med_pid = "Median",
+    virus_name = "Virus") %>% 
+  tab_style(
+    style = list(cell_fill(color = "grey"),
+                 cell_text(weight = "bold")),
+    locations = cells_row_groups(groups = everything())
+  ) %>% 
+  tab_style(
+    style = cell_borders(
+      sides = "left",
+      weight = px(2),
+      color = "grey"),
+    locations = cells_body(
+      columns = c(mean_cov, mean_pid, "n_contigs")
+    )
+  ) %>% 
+  data_color(
+    columns = mean_pid:max_pid,
+    palette = "viridis"
+    
+  ) %>% 
+  tab_footnote("* Putatively novel virus.")
+```
+
+# Virus Detections by Species
+
+```{r}
+virus_master_2023 %>% 
+  group_by(mosquito_species, virus_name) %>% 
+  summarise(count = n_distinct(virus_name, sample_number)) %>% 
+  pivot_wider(names_from = mosquito_species, values_from = count, values_fill = 0) %>% 
+  mutate("Aedes canadensis \n Total: 1" = (`Aedes canadensis` / 1) * 100,
+         "Aedes vexans \n Total: 19" = (`Aedes vexans` / 19) * 100,
+         "Anopheles earlei \n Total: 1" = (`Anopheles earlei` / 1) * 100,
+         "Coquillettidia perturbans \n Total: 6" = (`Coquillettidia perturbans` / 6) * 100,
+         "Culex tarsalis \n Total: 11" = (`Culex tarsalis` / 11) * 100,
+         "Ochlerotatus dorsalis \n Total: 5" = (`Ochlerotatus dorsalis` / 5) * 100,
+         "Ochlerotatus flavescens \n Total: 1" = (`Ochlerotatus flavescens` / 1) * 100,
+         "Ochlerotatus triseriatus \n Total: 1" = (`Ochlerotatus triseriatus` / 1) * 100,
+  ) %>% select(-`Aedes canadensis`:-`Ochlerotatus triseriatus`) %>% 
+  left_join(virus_lineage, by = "virus_name") %>% 
+   left_join(years, by = "virus_name") %>% 
+   relocate("2020", .after = "virus_name") %>% relocate("2021", .after = "2020") %>% 
+   mutate(across(.cols = c("2020", "2021"),
+                 ~case_when(. == "1" ~ TRUE,
+                            . == "0" ~ FALSE))) %>% 
+   mutate(across(.cols = "virus_name",
+                 ~case_when(grepl("Manitoba", virus_name) & !grepl("Manitoba virus", virus_name) ~ 
+                              paste0(., "*"),
+                            TRUE ~ .))) %>% 
+  group_by(genome, viral_family) %>% 
+  arrange(genome, viral_family) %>% 
+  gt() %>% 
+  fmt_number(columns = "Aedes canadensis \n Total: 1":"Ochlerotatus triseriatus \n Total: 1",
+             decimals = 2) %>% 
+  tab_spanner(label = "Percent of Libraries Detected by Species", 
+              columns = c("Aedes canadensis \n Total: 1":"Ochlerotatus triseriatus \n Total: 1")) %>% 
+   tab_spanner(label = html("Years Detected"),
+               columns = c("2020":"2021")) %>% 
+  cols_label(
+    "Aedes canadensis \n Total: 1" = html("<em>Aedes canadensis</em> <br> Total: 1"),
+    "Aedes vexans \n Total: 19" = html("<em>Aedes vexans</em> <br> Total: 19"),
+    "Anopheles earlei \n Total: 1" = html("<em>Anopheles earlei</em> <br> Total: 1"),
+    "Coquillettidia perturbans \n Total: 6" = html("<em>Coquillettidia perturbans</em> <br> Total: 6"),
+    "Culex tarsalis \n Total: 11" = html("<em>Culex tarsalis</em> <br> Total: 11"),
+    "Ochlerotatus dorsalis \n Total: 5" = html("<em>Ochlerotatus dorsalis</em> <br> Total: 5"),
+    "Ochlerotatus flavescens \n Total: 1" = html("<em>Ochlerotatus flavescens</em> <br> Total: 1"),
+    "Ochlerotatus triseriatus \n Total: 1" = html("<em>Ochlerotatus triseriatus</em> <br> Total: 1"),
+    virus_name = "Virus") %>% 
+   cols_align(align = "center",
+              columns = "2020":"Ochlerotatus triseriatus \n Total: 1") %>% 
+   tab_style(
+     style = list(cell_fill(color = "grey"),
+                  cell_text(weight = "bold")),
+     locations = cells_row_groups(groups = everything())) %>% 
+   data_color(columns = `Aedes canadensis \n Total: 1`:last_col(),
+              palette = "viridis", 
+              direction = "row") %>% 
+   tab_style(
+     style = cell_borders(
+       sides = "left",
+       weight = px(2),
+       color = "black"),
+     locations = cells_body(
+       columns = c("Aedes canadensis \n Total: 1"))) %>% 
+  tab_footnote("* Putatively novel virus") %>% 
+  tab_options(., container.width = 1500)
+```
+
+# Virus Profiles
+
+> Below are summaries for each virus detected. 
+
+```{r, virus_table}
+virus_profile_table <- function(virus) {
+
+ virus_table <<-  virus_master_2023 %>% 
+  filter(virus_name == virus) %>% 
+  #select(-"contig_sequences") %>% 
+  summarise(
+    num_species = n_distinct(mosquito_species),
+    num_contig = n(),
+    longest_contig = max(contig_length),
+    shortest_contig = min(contig_length),
+    avg_nt_id = mean(greatest_identity_percent),
+    max_nt_id = max(greatest_identity_percent),
+    min_nt_id = min(greatest_identity_percent)
+    
+  ) %>% 
+  gt() %>% 
+  cols_label(
+    longest_contig = "Max Contig",
+    shortest_contig = "Min Contig",
+    avg_nt_id = "Average aa Id",
+    max_nt_id = "Max aa Id",
+    min_nt_id = "Min aa Id",
+    num_contig = "n Contigs",
+    num_species = "n Species"
+  ) %>% 
+  tab_header(
+    title = paste0("Summary Stats for", " ", virus)
+  ) %>% 
+    fmt_number(
+      columns = 4:last_col(),
+      decimals = 2
+    )
+
+}
+  
+```
+
+
+
+```{r, virus_profiles, results = 'asis'}
+# Arrange df for virus reporting
+virus_master_2023 <<- virus_master_2023 %>% 
+  mutate(across(.cols = "virus_name",
+                ~case_when(grepl("Manitoba", virus_name) & !grepl("Manitoba virus", virus_name) ~ 
+                             paste0(., "*"),
+                           TRUE ~ .))) %>% 
+  arrange(desc(genome)) %>% 
+  drop_na(virus_name)
+
+for(virus in unique(virus_master_2023$virus_name)) {
+
+  genome <- virus_master_2023 %>% 
+    arrange(desc(genome)) %>% 
+    drop_na(virus_name) %>%  
+    filter(virus_name == virus) %>% 
+    pull(genome) %>% 
+    head(1)
+  
+  genome <- paste0(genome)
+  
+  family <- virus_master_2023 %>% 
+    filter(virus_name == virus) %>% 
+    pull(viral_family) %>% 
+    head(1)
+  
+  family <- paste0(family)
+
+  sample_detections <- virus_master_2023 %>% 
+    filter(virus_name == virus) %>% 
+    distinct(sample_number)
+  sample_detections <- paste0(nrow(sample_detections))
+  
+  
+  cat('\n\n#', virus, '\n\n')
+  
+  cat('\n\n>', virus, 'has a ', genome, 'genome and is a member of the family', family, 'and was detected in', sample_detections, 'sample(s).', 'See summary figures and tables below.',  '\n\n')
+  
+print(suppressMessages(
+  virus_master_2023 %>% 
+    filter(virus_name == virus) %>% 
+    select(-"contig_sequence") %>% 
+    group_by(mosquito_species, collection_year, location_pool) %>% 
+    summarise(n = n_distinct(sample_number)) %>% 
+    ggplot(aes(x = mosquito_species, y = n, fill = location_pool)) +
+    geom_col() +
+    facet_grid(. ~ collection_year) +
+    scale_fill_viridis_d("Location", option = "magma") +
+    theme_bw() +
+    labs(title = paste0("Number of Virus Detections"),
+       subtitle = paste0("For ", virus, " by Year, Species and Location")) +
+    theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 0.5))
+  ))
+  
+  cat('\n\n###', 'Years {.unlisted .unnumbered}', '\n\n')
+
+  print(htmltools::tagList(
+    virus_master_2023 %>% 
+      filter(virus_name == virus) %>% 
+      group_by(collection_year) %>% 
+      summarise(n = n_distinct(sample_number)) %>% 
+      gt() %>% 
+      cols_label(collection_year = "Year(s) Detected")
+    ))
+  
+  cat('\n\n###', 'Locations {.unlisted .unnumbered}', '\n\n')
+  
+    print(htmltools::tagList(
+    virus_master_2023 %>% 
+      filter(virus_name == virus) %>% 
+      group_by(location_pool) %>% 
+      summarise(n = n_distinct(sample_number)) %>% 
+      gt() %>% 
+      cols_label(location_pool = "Location(s) Detected")
+    ))
+    
+    cat('\n\n###', 'Mosquito Species {.unlisted .unnumbered}', '\n\n')
+  
+    print(htmltools::tagList(
+    virus_master_2023 %>% 
+      filter(virus_name == virus) %>% 
+      group_by(mosquito_species) %>% 
+      summarise(n = n_distinct(sample_number)) %>% 
+      gt() %>% 
+      cols_label(mosquito_species = "Mosquito Hosts")
+    ))
+    
+    cat('\n\n###', 'Contig Summary {.unlisted .unnumbered}', '\n\n')
+
+  virus_profile_table(virus)
+  
+  print(htmltools::tagList(virus_table))
+  
+  cat('\n\n###', 'aa Identity Summary {.unlisted .unnumbered}', '\n\n')
+  
+  print(suppressMessages(
+  virus_master_2023 %>% 
+    filter(virus_name == virus) %>% 
+    select(-"contig_sequence") %>% 
+    ggplot(aes(x = greatest_identity_percent)) +
+    geom_histogram(aes(fill = greatest_identity_percent < 90)) +
+    geom_vline(xintercept = 90, linetype = "dotted", colour = "firebrick") +
+    theme_bw() +
+    labs(title = paste0("aa Identity"),
+       subtitle = paste0("For ", virus),
+       x = "aa Identity", 
+       y = "Number of Contigs") +
+    theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    theme(legend.position = "none")
+  ))
+  
+}
+
+
+```
