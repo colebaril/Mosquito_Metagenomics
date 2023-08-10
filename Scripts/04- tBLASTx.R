@@ -6,7 +6,8 @@ pacman::p_load(tidyverse, janitor, here, phylotools, assertr,
 
 # Load Contigs Dataset
 
-contigs <- read_csv(here("Data/Contigs.csv"))
+contigs <- read_csv(here("Data/Contigs.csv")) %>% 
+  select(-1)
 
 # TBLASTX ----
 
@@ -31,7 +32,7 @@ tblastx <- future_map_dfr(list.files(pattern = ".xlsx",
   filter(contig_length >= 250) %>% 
   verify(contig_length >= 250) %>% 
   verify(coverage >= 10) %>% 
-  mutate(novel_flag = case_when(greatest_identity_percent < 90 ~ "Presumptive Novel", TRUE ~ "Not Novel"))
+  mutate(novel_flag = case_when(greatest_identity_percent < 85 ~ "Presumptive Novel", TRUE ~ "Not Novel"))
 
 tblastx_master <- tblastx %>% 
   
@@ -93,7 +94,8 @@ mutate(virus_name = case_when(str_detect(result_desc, regex("Soybean thrips ifla
                               str_detect(result_desc, regex("Partiti-like culex mosquito virus", ignore_case = TRUE)) ~ 
                                 "Partiti-like culex mosquito virus",
                               str_detect(result_desc, regex("Elisy virus", ignore_case = TRUE)) ~ "Elisy virus",
-                              str_detect(result_desc, regex("Canya virus", ignore_case = TRUE)) ~ "Canya virus",
+                              str_detect(result_desc, regex("Canya virus", ignore_case = TRUE)) & novel_flag != "Presumptive Novel" ~ "Canya virus",
+                              str_detect(result_desc, regex("Canya virus", ignore_case = TRUE)) & novel_flag == "Presumptive Novel" ~ "Manitoba rhabdovirus 3",
                               str_detect(result_desc, regex("Manitoba virus", ignore_case = TRUE)) ~ "Manitoba virus",
                               str_detect(result_desc, regex("Flanders hapavirus", ignore_case = TRUE))  ~ "Flanders hapavirus",
                               str_detect(result_desc, regex("Hapavirus flanders", ignore_case = TRUE)) ~ "Flanders hapavirus",
@@ -108,25 +110,29 @@ mutate(virus_name = case_when(str_detect(result_desc, regex("Soybean thrips ifla
                               str_detect(result_desc, regex("Culex bunyavirus 2", ignore_case = TRUE)) ~ "Culex bunyavirus 2",
                               str_detect(result_desc, regex("Bunyaviridae env", ignore_case = TRUE)) ~ "Culex bunyavirus 2",
                               str_detect(result_desc, regex("Turlock", ignore_case = TRUE)) ~ "turlock orthobunyavirus",
-                              str_detect(result_desc, regex("Riverside virus 1", ignore_case = TRUE)) ~ "Manitoba Rhabdovirus 1",
+                              str_detect(result_desc, regex("Riverside virus 1", ignore_case = TRUE)) & novel_flag == "Presumptive Novel" ~ "Manitoba Rhabdovirus 1",
+                              str_detect(result_desc, regex("Riverside virus 1", ignore_case = TRUE)) & novel_flag == "Not Novel" ~ "Riverside virus 1",
                               str_detect(result_desc, regex("Culex rhabdo-like virus", ignore_case = TRUE)) & 
                                 novel_flag == "Presumptive Novel" ~ "Manitoba Rhabdovirus 1",
-                              str_detect(result_desc, regex("Yongsan picorna-like virus 1", ignore_case = TRUE)) ~ 
+                              str_detect(result_desc, regex("Yongsan picorna-like virus 1", ignore_case = TRUE)) & novel_flag == "Presumptive Novel" ~ 
                                 "Manitoba picorna-like virus 1",
-                              str_detect(result_desc, regex("Thrace picorna-like virus 1", ignore_case = TRUE)) ~ 
-                                "Manitoba picorna-like virus 1",
+                              str_detect(result_desc, regex("Yongsan picorna-like virus 1", ignore_case = TRUE)) & novel_flag == "Not Novel" ~ 
+                                "Yongsan picorna-like virus 1",
+                              str_detect(result_desc, regex("Thrace picorna-like virus 1", ignore_case = TRUE)) ~ "Thrace picorna-like virus 1",
                               str_detect(result_desc, regex("Nor picorna-like virus", ignore_case = TRUE)) ~ 
                                 "Manitoba picorna-like virus 1",
-                              str_detect(result_desc, regex("Bro virus", ignore_case = TRUE)) ~ 
-                                "Manitoba mononega-like virus 1",
+                              str_detect(result_desc, regex("Bro virus", ignore_case = TRUE)) & novel_flag == "Not Novel" ~ "Bro virus",
+                              str_detect(result_desc, regex("Bro virus", ignore_case = TRUE)) & novel_flag != "Not Novel" ~ "Manitoba mononega-like virus 3",
                               str_detect(result_desc, regex("Joensuu anphevirus", ignore_case = TRUE)) ~ 
                                 "Manitoba mononega-like virus 1",
                               str_detect(result_desc, regex("Budalangi Iflavi-like virus", ignore_case = TRUE)) ~ 
                                 "Manitoba iflavi-like virus 1",
                               str_detect(result_desc, regex("Hypsignathus monstrosus tombus-like virus", ignore_case = TRUE)) ~ 
                                 "Manitoba tombus-like virus 1",
-                              str_detect(result_desc, regex("Tiger mosquito bi-segmented tombus-like virus", ignore_case = TRUE)) ~ 
-                                "Manitoba tombus-like virus 1",
+                              str_detect(result_desc, regex("Tiger mosquito bi-segmented tombus-like virus", ignore_case = TRUE)) & novel_flag ==
+                                "Presumptive Novel" ~ "Manitoba tombus-like virus 1",
+                              str_detect(result_desc, regex("Tiger mosquito bi-segmented tombus-like virus", ignore_case = TRUE)) & novel_flag ==
+                                "Not Novel" ~ "Tiger mosquito bi-segmented tombus-like virus",
                               str_detect(result_desc, regex("Culicine-associated Z virus", ignore_case = TRUE)) ~ "Ballard Lake virus",
                               str_detect(result_desc, regex("Port Bolivar virus ", ignore_case = TRUE)) ~ "Ballard Lake virus",
                               str_detect(result_desc, regex("Espirito Santo virus", ignore_case = TRUE)) ~ "Ballard Lake virus",
@@ -140,18 +146,19 @@ mutate(virus_name = case_when(str_detect(result_desc, regex("Soybean thrips ifla
                               str_detect(result_desc, regex("Hanko iflavirus 1", ignore_case = TRUE)) ~ "Hanko iflavirus 1",
                               str_detect(result_desc, regex("Astopletus virus", ignore_case = TRUE)) ~ "Astopletus virus",
                               str_detect(result_desc, regex("Des Moines River virus", ignore_case = TRUE)) ~ "Des Moines River virus",
-                              str_detect(result_desc, regex("Big Cypress virus", ignore_case = TRUE)) ~ "Manitoba mononega-like virus 2",
+                              str_detect(result_desc, regex("Big Cypress virus", ignore_case = TRUE)) ~ "Big Cypress virus",
                               str_detect(result_desc, regex("Atrato picorna-like virus", ignore_case = TRUE)) ~ "Manitoba picorna-like virus 2",
-                              str_detect(result_desc, regex("Pedersore iflavirus", ignore_case = TRUE)) ~ "Manitoba iflavirus 1",
+                              str_detect(result_desc, regex("Pedersore iflavirus", ignore_case = TRUE)) ~ "Pedersore iflavirus",
                               str_detect(result_desc, regex("Hubei mosquito virus 1", ignore_case = TRUE)) ~ "Manitoba toti-like virus 1",
                               str_detect(result_desc, regex("Dicistroviridae sp. isolate 78", ignore_case = TRUE)) ~ "Manitoba picorna-like virus 3",
                               str_detect(result_desc, regex("Bat tymo-like virus", ignore_case = TRUE)) ~ "Manitoba tymo-like virus 1",
                               str_detect(result_desc, regex("Culex rhabdo-like", ignore_case = TRUE)) ~ "Culex Rhabdo-like virus",
                               
-                              str_detect(result_desc, regex("Hanko iflavirus 2", ignore_case = TRUE)) ~ "Hanko iflavirus 2",
+                              str_detect(result_desc, regex("Hanko iflavirus 2", ignore_case = TRUE)) & novel_flag != "Presumptive Novel" ~ "Hanko iflavirus 2",
+                              str_detect(result_desc, regex("Hanko iflavirus 2", ignore_case = TRUE)) & novel_flag == "Presumptive Novel" ~ "Manitoba iflavirus 1",
                               str_detect(result_desc, regex("Hanko iflavirus 1", ignore_case = TRUE)) ~ "Hanko iflavirus 1",
                               str_detect(result_desc, regex("Yalta virus", ignore_case = TRUE)) ~ "Yalta virus ",
-                              str_detect(result_desc, regex("Serbia mononega", ignore_case = TRUE)) ~ "Serbia mononega-like virus 1",
+                              str_detect(result_desc, regex("Serbia mononega", ignore_case = TRUE)) ~ "Manitoba mononega-like virus 2",
                               str_detect(result_desc, regex("MAG: XiangYun narna-levi-like virus 16", ignore_case = TRUE)) ~ "Manitoba narnavirus 1",
                               str_detect(result_desc, regex("MAG: Utsjoki negevirus 3", ignore_case = TRUE)) ~ "Utsjoki negevirus 3",
                               str_detect(result_desc, regex("MAG: Inari jingmenvirus ", ignore_case = TRUE)) ~ "Inari jingmenvirus",
@@ -161,19 +168,18 @@ mutate(virus_name = case_when(str_detect(result_desc, regex("Soybean thrips ifla
                               str_detect(result_desc, regex("Malby virus", ignore_case = TRUE)) ~ "Malby virus",
                               str_detect(result_desc, regex("Hubei arthropod virus 1", ignore_case = TRUE)) ~ "Hubei arthropod virus 1",
                               str_detect(result_desc, regex("Aedes aegypti To virus 1", ignore_case = TRUE)) ~ "Aedes aegypti To virus 1",
-                              str_detect(result_desc, regex("MAG: Grus japonensis parvoviridae sp", ignore_case = TRUE)) ~ "MAG: Grus japonensis parvoviridae sp",
+                              str_detect(result_desc, regex("MAG: Grus japonensis parvoviridae sp", ignore_case = TRUE)) ~ "Grus japonensis parvoviridae",
                               str_detect(result_desc, regex("Invertebrate iridescent virus 22", ignore_case = TRUE)) ~ "Invertebrate iridescent virus 22",
                               str_detect(result_desc, regex("Homalodisca coagulata virus-1", ignore_case = TRUE)) ~ "Manitoba dicistro-like virus 1",
                               str_detect(result_desc, regex("Aedes albopictus densovirus", ignore_case = TRUE)) ~ "Aedes albopictus densovirus",
                               str_detect(result_desc, regex("MAG: Palkane totivirus isolate", ignore_case = TRUE)) ~ "Manitoba toti-like virus 2",
                               str_detect(result_desc, regex("Aedes vexans densovirus isolate", ignore_case = TRUE)) ~ "Aedes vexans densovirus isolate",
                               str_detect(result_desc, regex("Wiseana iridescent virus", ignore_case = TRUE)) ~ "Manitoba iridescent virus 1",
-                              str_detect(result_desc, regex("Grus japonensis parvoviridae sp", ignore_case = TRUE)) ~ "Grus japonensis parvoviridae sp",
                               str_detect(result_desc, regex("Enontekio virga-like virus 2", ignore_case = TRUE)) ~ "Manitoba virgavirus 1",
                               str_detect(result_desc, regex("Menghai rhabdovirus", ignore_case = TRUE)) ~ "Manitoba rhabdovirus 2",
                               str_detect(result_desc, regex("Hubei arthropod virus 1", ignore_case = TRUE)) ~ "Hubei arthropod virus 1",
                               str_detect(result_desc, regex("Hanko totivirus 9", ignore_case = TRUE)) ~ "Manitoba toti-like virus 3",
-                              str_detect(result_desc, regex("Hattula totivirus 1", ignore_case = TRUE)) ~ "Manitoba toti-like virus 4",
+                              str_detect(result_desc, regex("Hattula totivirus 1", ignore_case = TRUE)) ~ "Hattula totivirus 1",
                               
                               
                               
@@ -201,6 +207,7 @@ mutate(genome = case_when(str_detect(virus_name, regex("Soybean thrips iflavirus
                           str_detect(virus_name, regex("Partiti-like culex mosquito virus", ignore_case = TRUE)) ~ "dsRNA",
                           str_detect(virus_name, regex("Elisy virus", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Canya virus", ignore_case = TRUE)) ~ "-ssRNA",
+                          str_detect(virus_name, regex("Manitoba rhabdovirus 3", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Manitoba virus", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Flanders hapavirus", ignore_case = TRUE))  ~ "-ssRNA",
                           str_detect(virus_name, regex("Hapavirus flanders", ignore_case = TRUE)) ~ "-ssRNA",
@@ -216,6 +223,7 @@ mutate(genome = case_when(str_detect(virus_name, regex("Soybean thrips iflavirus
                           str_detect(virus_name, regex("Bunyaviridae env", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Turlock", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Riverside virus 1", ignore_case = TRUE)) ~ "-ssRNA",
+                          str_detect(virus_name, regex("Manitoba rhabdovirus 1", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Culex rhabdo-like virus", ignore_case = TRUE)) & 
                             novel_flag == "Presumptive Novel" ~ "-ssRNA",
                           str_detect(virus_name, regex("Yongsan picorna-like virus 1", ignore_case = TRUE)) ~ 
@@ -248,6 +256,8 @@ mutate(genome = case_when(str_detect(virus_name, regex("Soybean thrips iflavirus
                           str_detect(virus_name, regex("Astopletus virus", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Des Moines River virus", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba mononega-like virus 2", ignore_case = TRUE)) ~ "+ssRNA",
+                          str_detect(virus_name, regex("Bro virus", ignore_case = TRUE)) ~ "+ssRNA",
+                          str_detect(virus_name, regex("Manitoba mononega-like virus 3", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba picorna-like virus 2", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba iflavi-like virus 1", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba toti-like virus 1", ignore_case = TRUE)) ~ "dsRNA",
@@ -256,18 +266,20 @@ mutate(genome = case_when(str_detect(virus_name, regex("Soybean thrips iflavirus
                           str_detect(virus_name, regex("Black Queen Cell Virus", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba tombus-like virus 1", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba picorna-like virus 1", ignore_case = TRUE)) ~ "+ssRNA",
-                          str_detect(virus_name, regex("Manitoba rhabdovirus 1", ignore_case = TRUE)) ~ "+ssRNA",
-                          str_detect(virus_name, regex("Manitoba iflavirus 1", ignore_case = TRUE)) ~ "+ssRNA",
+                          str_detect(virus_name, regex("Manitoba rhabdovirus 1", ignore_case = TRUE)) ~ "-ssRNA",
+                          str_detect(virus_name, regex("Pedersore iflavirus", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Culex Rhabdo-like virus", ignore_case = TRUE)) ~ "-ssRNA",
                           str_detect(virus_name, regex("Manitoba dicistro-like virus 1", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Aedes albopictus densovirus", ignore_case = TRUE)) ~ "ssDNA",
                           str_detect(virus_name, regex("Manitoba toti-like virus 2", ignore_case = TRUE)) ~ "dsRNA",
                           str_detect(virus_name, regex("Aedes vexans densovirus isolate", ignore_case = TRUE)) ~ "ssDNA",
                           str_detect(virus_name, regex("Manitoba iridescent virus 1", ignore_case = TRUE)) ~ "dsDNA",
-                          str_detect(virus_name, regex("Serbia mononega-like virus 1", ignore_case = TRUE)) ~ "+ssRNA",
+                          str_detect(virus_name, regex("Manitoba mononega-like virus 2", ignore_case = TRUE)) ~ "+ssRNA",
+                          str_detect(virus_name, regex("Big Cypress virus", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Hanko iflavirus 1", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Hanko iflavirus 2", ignore_case = TRUE)) ~ "+ssRNA",
-                          str_detect(virus_name, regex("Grus japonensis parvoviridae sp", ignore_case = TRUE)) ~ "ssDNA",
+                          str_detect(virus_name, regex("Manitoba iflavirus 1", ignore_case = TRUE)) ~ "+ssRNA",
+                          str_detect(virus_name, regex("Grus japonensis parvoviridae", ignore_case = TRUE)) ~ "ssDNA",
                           str_detect(virus_name, regex("Manitoba narnavirus 1", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba virgavirus 1", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba rhabdovirus 2", ignore_case = TRUE)) ~ "-ssRNA",
@@ -275,7 +287,7 @@ mutate(genome = case_when(str_detect(virus_name, regex("Soybean thrips iflavirus
                           str_detect(virus_name, regex("Utsjoki negevirus 3", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Hubei arthropod virus 1", ignore_case = TRUE)) ~ "+ssRNA",
                           str_detect(virus_name, regex("Manitoba toti-like virus 3", ignore_case = TRUE)) ~ "dsRNA",
-                          str_detect(virus_name, regex("Manitoba toti-like virus 4", ignore_case = TRUE)) ~ "dsRNA"
+                          str_detect(virus_name, regex("Hattula totivirus 1", ignore_case = TRUE)) ~ "dsRNA"
                           
                           
                           
@@ -306,10 +318,11 @@ mutate(viral_family = case_when(str_detect(virus_name, regex("Soybean thrips ifl
                                 str_detect(virus_name, regex("Partiti-like culex mosquito virus", ignore_case = TRUE)) ~ "Partitiviridae",
                                 str_detect(virus_name, regex("Elisy virus", ignore_case = TRUE)) ~ "Rhabdoviridae",
                                 str_detect(virus_name, regex("Canya virus", ignore_case = TRUE)) ~ "Rhabdoviridae",
+                                str_detect(virus_name, regex("Manitoba rhabdovirus 3", ignore_case = TRUE)) ~ "Rhabdoviridae",
                                 str_detect(virus_name, regex("Manitoba virus", ignore_case = TRUE)) ~ "Rhabdoviridae",
-                                str_detect(virus_name, regex("Flanders hapavirus", ignore_case = TRUE))  ~ "Flanders hapavirus",
-                                str_detect(virus_name, regex("Hapavirus flanders", ignore_case = TRUE)) ~ "Flanders hapavirus",
-                                str_detect(virus_name, regex("Culex rhabdovirus", ignore_case = TRUE)) ~ "Culex rhabdovirus",
+                                str_detect(virus_name, regex("Flanders hapavirus", ignore_case = TRUE))  ~ "Rhabdoviridae",
+                                str_detect(virus_name, regex("Hapavirus flanders", ignore_case = TRUE)) ~ "Rhabdoviridae",
+                                str_detect(virus_name, regex("Culex rhabdovirus", ignore_case = TRUE)) ~ "Rhabdoviridae",
                                 str_detect(virus_name, regex("Merida virus", ignore_case = TRUE)) ~ "Rhabdoviridae",
                                 str_detect(virus_name, regex("Merida-like virus", ignore_case = TRUE)) ~ "Rhabdoviridae",
                                 str_detect(virus_name, regex("Flanders hapavirus", ignore_case = TRUE)) ~ "Rhabdoviridae",
@@ -362,17 +375,21 @@ mutate(viral_family = case_when(str_detect(virus_name, regex("Soybean thrips ifl
                                 str_detect(virus_name, regex("Manitoba tombus-like virus 1", ignore_case = TRUE)) ~ "Tombusviridae",
                                 str_detect(virus_name, regex("Manitoba picorna-like virus 1", ignore_case = TRUE)) ~ "Iflaviridae",
                                 str_detect(virus_name, regex("Manitoba rhabdovirus 1", ignore_case = TRUE)) ~ "Rhabdoviridae",
-                                str_detect(virus_name, regex("Manitoba iflavirus 1", ignore_case = TRUE)) ~ "Iflaviridae",
+                                str_detect(virus_name, regex("Riverside virus 1", ignore_case = TRUE)) ~ "Rhabdoviridae",
+                                str_detect(virus_name, regex("Pedersore iflavirus", ignore_case = TRUE)) ~ "Iflaviridae",
                                 str_detect(virus_name, regex("Culex Rhabdo-like virus", ignore_case = TRUE)) ~ "Rhabdoviridae",
                                 str_detect(virus_name, regex("Manitoba dicistro-like virus 1", ignore_case = TRUE)) ~ "Dicistroviridae",
                                 str_detect(virus_name, regex("Aedes albopictus densovirus", ignore_case = TRUE)) ~ "Parvoviridae",
                                 str_detect(virus_name, regex("Manitoba toti-like virus 2", ignore_case = TRUE)) ~ "Totiviridae",
                                 str_detect(virus_name, regex("Aedes vexans densovirus isolate", ignore_case = TRUE)) ~ "Parvoviridae",
                                 str_detect(virus_name, regex("Manitoba iridescent virus 1", ignore_case = TRUE)) ~ "Iridoviridae",
-                                str_detect(virus_name, regex("Serbia mononega-like virus 1", ignore_case = TRUE)) ~ "Negevirus",
+                                str_detect(virus_name, regex("Manitoba mononega-like virus 2", ignore_case = TRUE)) ~ "Negevirus",
+                                str_detect(virus_name, regex("Big cypress virus", ignore_case = TRUE)) ~ "Negevirus",
+                                str_detect(virus_name, regex("Bro virus", ignore_case = TRUE)) ~ "Negevirus",
+                                str_detect(virus_name, regex("Manitoba mononega-like virus 3", ignore_case = TRUE)) ~ "Negevirus",
                                 str_detect(virus_name, regex("Hanko iflavirus 1", ignore_case = TRUE)) ~ "Iflaviridae",
                                 str_detect(virus_name, regex("Hanko iflavirus 2", ignore_case = TRUE)) ~ "Iflaviridae",
-                                str_detect(virus_name, regex("Grus japonensis parvoviridae sp", ignore_case = TRUE)) ~ "Parvoviridae",
+                                str_detect(virus_name, regex("Grus japonensis parvoviridae", ignore_case = TRUE)) ~ "Parvoviridae",
                                 str_detect(virus_name, regex("Manitoba narnavirus 1", ignore_case = TRUE)) ~ "Narnaviridae",
                                 str_detect(virus_name, regex("Manitoba virgavirus 1", ignore_case = TRUE)) ~ "Virgaviridae",
                                 str_detect(virus_name, regex("Manitoba rhabdovirus 2", ignore_case = TRUE)) ~ "Rhabdoviridae",
@@ -380,7 +397,8 @@ mutate(viral_family = case_when(str_detect(virus_name, regex("Soybean thrips ifl
                                 str_detect(virus_name, regex("Utsjoki negevirus 3", ignore_case = TRUE)) ~ "Negevirus",
                                 str_detect(virus_name, regex("Hubei arthropod virus 1", ignore_case = TRUE)) ~ "Iflaviridae",
                                 str_detect(virus_name, regex("Manitoba toti-like virus 3", ignore_case = TRUE)) ~ "Totiviridae",
-                                str_detect(virus_name, regex("Manitoba toti-like virus 4", ignore_case = TRUE)) ~ "Totiviridae",
+                                str_detect(virus_name, regex("Hattula totivirus 1", ignore_case = TRUE)) ~ "Totiviridae",
+                                str_detect(virus_name, regex("Manitoba iflavirus 1", ignore_case = TRUE)) ~ "Iflaviridae"
                                 
                                 
                                 
@@ -396,3 +414,69 @@ missing <- tblastx_master %>%
 
 tblastx_master %>% 
   write.csv(here("Data/tblastx_master.csv"))
+
+tblastx_master_contigs <- tblastx_master %>% 
+  select(sample_number, contig_number, contig_sequence) %>% 
+  unite(col = "id", sample_number, contig_number, sep = "-") %>% 
+  rename(seq.name = id,
+         seq.text = contig_sequence)
+
+  dat2fasta(tblastx_master_contigs, outfile = paste0("Data/Fasta/all_contigs.fasta"))
+
+# NOVEL VIRUS DATA ----
+
+novel_virus_data <- tblastx_master %>% 
+  rename("blast_hit" = result_desc,
+         "coverage_depth" = coverage,
+         "blast_hit_accession" = accession) %>% 
+  select(-greatest_hsp_length) %>% 
+  filter(novel_flag == "Presumptive Novel")
+  
+  write.csv(novel_virus_data, here("Data/Data/novel_virus_data.csv"))
+
+for(virus in unique(novel_virus_data$virus_name)) {
+  
+  novel_virus_data_fasta <- novel_virus_data %>% 
+    filter(virus_name == virus) %>% 
+    select(sample_number, contig_number, contig_sequence) %>% 
+    unite(col = "id", sample_number, contig_number, sep = "-") %>% 
+    rename(seq.name = id,
+           seq.text = contig_sequence)
+  
+  dat2fasta(novel_virus_data_fasta, outfile = paste0("Data/Fasta/Novel/", virus, "_contigs.fasta"))
+}
+
+# NOT NOVEL VIRUS DATA ----
+
+virus_data <- tblastx_master %>% 
+  rename("blast_hit" = result_desc,
+         "coverage_depth" = coverage,
+         "blast_hit_accession" = accession) %>% 
+  select(-greatest_hsp_length) %>% 
+  filter(novel_flag != "Presumptive Novel")
+  
+  write.csv(virus_data, here("Data/Data/non-novel_virus_data.csv"))
+
+for(virus in unique(virus_data$virus_name)) {
+  
+  virus_data_fasta <- virus_data %>% 
+    filter(virus_name == virus) %>% 
+    select(sample_number, contig_number, contig_sequence) %>% 
+    unite(col = "id", sample_number, contig_number, sep = "-") %>% 
+    rename(seq.name = id,
+           seq.text = contig_sequence)
+  
+  dat2fasta(virus_data_fasta, outfile = paste0("Data/Fasta/Not Novel/", virus, "_contigs.fasta"))
+}
+  
+# Accession Numbers
+  
+tblastx_master %>% 
+  select(accession) %>% 
+  rename("AccessionNumber" = accession) %>% 
+  write.csv(here("Data/accession_numbers.csv"), row.names = FALSE)
+
+
+
+
+  

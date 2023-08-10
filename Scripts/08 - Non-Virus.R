@@ -171,7 +171,64 @@ dev.off()
 
 
 
-# TABLES ----
+# Read Summaries
+
+# Parasites
+
+parasite_mosquito_species_reads <- parasites %>% 
+  group_by(mosquito_species) %>% 
+  summarise(sum_parasite_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+parasite_reads <- parasites %>% 
+  group_by(phylum) %>% 
+  summarise(sum_parasite_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+# Fungi
+
+fungi_mosquito_species_reads <- fungi %>% 
+  group_by(mosquito_species) %>% 
+  summarise(sum_fungi_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+fungi_reads <- fungi %>% 
+  group_by(fungal_division_or_phylum) %>% 
+  summarise(sum_fungi_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+# Plant
+
+plant_mosquito_species_reads <- plants %>% 
+  group_by(mosquito_species) %>% 
+  summarise(sum_plant_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+plants_reads <- plants %>% 
+  group_by(order) %>% 
+  summarise(sum_plant_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+# vert
+
+vert_mosquito_species_reads <- vert %>% 
+  group_by(mosquito_species) %>% 
+  summarise(sum_vert_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+vert_reads <- vert %>% 
+  group_by(type) %>% 
+  summarise(sum_vert_reads = sum(nt_reads)) %>% 
+  adorn_totals()
+
+
+# Save 
+
+reads_list <- list(parasite_mosquito_species_reads, parasite_reads, fungi_mosquito_species_reads, fungi_reads, plant_mosquito_species_reads,
+                   plants_reads, vert_mosquito_species_reads, vert_reads)
+
+write.xlsx(reads_list, file = here("Data/non-virus_reads_summary.xlsx"))
+  
 
 
 

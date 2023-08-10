@@ -31,8 +31,9 @@ metadata_plot <- metadata %>%
   geom_point(aes(x = number_reads_passing_qc_log, colour = species, shape = year, size = 1.2)) +
   geom_point(aes(x = number_reads_passing_host_filters_log, colour = species, shape = year, size = 1.2)) +
   
-  geom_text(aes(label = number_in_pool), hjust = -0.75) +
+  geom_text(aes(label = number_in_pool), hjust = 1.5) +
   theme_bw() +
+  scale_x_reverse() +
   scale_colour_viridis_d("Species", labels = c("*Ae. canadensis*", "*Ae. vexans*", "*An. earlei*", "*Cq. perturbans*", 
                                                "*Cx. tarsalis*", "*Oc. dorsalis*", "*Oc. flavescens*", "*Oc. triseriatus*")) +
   scale_shape_manual("Year", values = c(15, 17, 18, 19)) +
@@ -42,15 +43,15 @@ metadata_plot <- metadata %>%
         panel.grid.minor.y = element_blank(),
         legend.title = element_text(size = 12),
         legend.text = element_markdown(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
         legend.position = c(0.95, 0.3),
         legend.background = element_rect(linetype = 2, linewidth = 0.5, colour = 1)) +
   guides(colour = guide_legend(override.aes = list(size = 5)),
          shape = guide_legend(override.aes = list(size = 5)),
          size = "none") +
   labs(x = "Total Reads (Log 10)",
-       y = "Sample ID",
-       title = "Reads remaining after quality control and host-filtering (Mosquito) steps",
-       subtitle = "Number of specimens represented by each sample displayed to the right")
+       y = "")
 
 
 
@@ -58,7 +59,7 @@ metadata_plot <- metadata %>%
 
 # Saving as a .tiff at 300 dpi. 
 
-tiff(here("Figures/metadata_plot.tiff"), units="in", width=16, height=10, res=300)
+tiff(here("metadata_plot.tiff"), units="in", width=16, height=10, res=300)
 metadata_plot
 dev.off()
 
