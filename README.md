@@ -4,7 +4,8 @@ Code and workflow for analyzing, summarizing, visualizing and tabulating mosquit
 
 # Tables
 
-  <script src="https://gist.github.com/colebaril/1267bea717fbaa43a2df9551ae377808.js">Test</script>
+[Click here to view the HTML table](Tables/known_virus_detections_by_species_summary.html)
+
 
 
 
