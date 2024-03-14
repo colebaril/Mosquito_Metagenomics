@@ -4,7 +4,9 @@ Code and workflow for analyzing, summarizing, visualizing and tabulating mosquit
 
 # Tables
 
-[Click here to view the HTML table](Tables/known_virus_detections_by_species_summary.html)
+[Click here to view known viruses table](https://colebaril.github.io/Mosquito_Metagenomics/Tables/known_virus_detections_by_species_summary.html)
+
+[Click here to view known viruses table](https://colebaril.github.io/Mosquito_Metagenomics/Tables/novel_virus_detections_by_species_summary.html)
 
 
 
