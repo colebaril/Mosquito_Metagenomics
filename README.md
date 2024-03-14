@@ -2,9 +2,17 @@
 
 Code and workflow for analyzing, summarizing, visualizing and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files.
 
+# Tables
+
+  <script src="https://gist.github.com/colebaril/1267bea717fbaa43a2df9551ae377808.js"></script>
+
+
+
+
+
+
+
 # Figures
-
-
 
 
 <figure>
