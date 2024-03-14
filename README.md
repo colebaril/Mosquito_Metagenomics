@@ -3,10 +3,22 @@
 Code and workflow for analyzing, summarizing, visualizing and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files.
 
 # Figures
+
+
+
+
+<figure>
+  <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/f1762075-8f07-425b-b6d3-61f5aabb91a6" alt="Combined_Virus_Venn_Diagram_Mar2024">
+  <figcaption>Figure 1: Venn Diagram depicting the number of unique viruses identified in each mosquito genus separated by known viruses (A) which have been previously reported and novel viruses (B) which we newly identified.</figcaption>
+</figure>
+
 <details>
   <summary>Click to view code</summary>
 
 ```r
+require(pacman)
+p_load(tidyverse, janitor, here, gt, forcats, tiff, openxlsx, ggVennDiagram, ggpattern, svglite)
+
 virus_master_2023 <- read_csv(here("Data/tblastx_master.csv"))
 
 # KNOWN VIRUSES
@@ -192,9 +204,80 @@ ggsave("Combined_Virus_Venn_Diagram_Mar2024.png", plot = last_plot(), width=18, 
 </details>
 
 <figure>
-  <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/f1762075-8f07-425b-b6d3-61f5aabb91a6" alt="Combined_Virus_Venn_Diagram_Mar2024">
-  <figcaption>Figure 1: Venn Diagram depicting the number of unique viruses identified in each mosquito genus separated by known viruses (A) which have been previously reported and novel viruses (B) which we newly identified.</figcaption>
+  <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/c11fec09-5867-4147-8fa8-25070553b89b" alt="Viruses Plot">
+  <figcaption>Figure 2: Faceted bar plot displaying the number of unique viruses identified (y-axis) in each mosquito species. The total number of viruses identified in a mosquito species and the number of sequencing libraries representing each mosquito species is displayed at the top of each facet. Viral family is shown on the x-axis and bars are coloured based on genome type of the family. The number of novel viruses is indicated by hash marks.</figcaption>
 </figure>
+<details>
+  <summary>Click to view code</summary>
+
+```r
+require(pacman)
+p_load(tidyverse, janitor, here, gt, forcats, tiff, openxlsx, ggVennDiagram, ggpattern, svglite)
+
+virus_master_2023 <- read_csv(here("Data/tblastx_master.csv"))
+
+virus_master_2023 %>%
+  filter(novel_flag == "Presumptive Novel") %>% 
+  distinct(virus_name, mosquito_species, .keep_all = TRUE) %>%
+  group_by(viral_family, genome, mosquito_species) %>%
+  summarise(n = n()) %>%
+  ungroup() %>% group_by(mosquito_species) %>%
+  summarise(sum = sum(n))
+
+p_load(ggpattern, svglite)
+
+virus_org <- virus_master_2023 %>% 
+  distinct(virus_name, mosquito_species, .keep_all = TRUE) %>% 
+  group_by(viral_family, genome, mosquito_species, novel_flag) %>% 
+  summarise(n = n()) %>% 
+  arrange(genome, desc(n)) %>% 
+  ggplot(aes(x = fct_inorder(viral_family), y = n, fill = genome, pattern = novel_flag)) +
+  geom_col_pattern(pattern_fill = "white",
+                   pattern_fill2 = "white",
+                   pattern_colour = "white",
+                   colour = "white",
+                   pattern_size = 0.5,
+                   pattern_alpha = 0.5,
+                   show.legend = TRUE,
+                   pattern_key_scale_factor = .5) +
+  theme_bw(base_size = 14) +
+  scale_fill_viridis_d("Genome", guide = guide_legend(override.aes = list(pattern = "none"))) +
+  scale_pattern_manual("", values = c("Not Novel" = "none", "Presumptive Novel" = "stripe"), 
+                       labels = c("Known Virus", "Novel Virus")) +
+  scale_y_continuous(name = "Number of Distinct Viruses", breaks = c(0, 2, 4, 6, 8)) + 
+  facet_wrap(~ mosquito_species, ncol = 2, scales = "free_x", labeller = labeller(
+    mosquito_species =
+      c(
+        "Aedes canadensis" = "<strong>*Aedes canadensis* (n = 5 distinct viruses, 1 library)</strong>",
+        "Aedes vexans" = "<strong>*Aedes vexans* (n = 28 distinct viruses, 19 libraries)</strong>",
+        "Anopheles earlei" = "<strong>*Anopheles earlei* (n = 1 distinct virus, 1 library)</strong>",
+        "Coquillettidia perturbans" = "<strong>*Coquillettidia perturbans* (n = 13 distinct viruses, 6 libraries)</strong>",
+        "Culex tarsalis" = "<strong>*Culex tarsalis* (n = 34 distinct viruses, 11 libraries)</strong>",
+        "Ochlerotatus dorsalis" = "<strong>*Ochlerotatus dorsalis* (n = 15 distinct viruses, 5 libraries)</strong>",
+        "Ochlerotatus flavescens" = "<strong>*Ochlerotatus flavescens* (n = 2 distinct viruses, 1 library)</strong>",
+        "Ochlerotatus triseriatus" = "<strong>*Ochlerotatus triseriatus* (n = 2 distinct viruses, 1 library)</strong>"
+      )
+  )) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 18),
+        axis.text.y = element_text(size = 18),
+        axis.title.y = element_text(size = 20),
+        strip.text = ggtext::element_markdown(size = 18),
+        legend.title = element_text(size = 18, face = "bold"),
+        legend.text = element_text(size = 18),
+        legend.position = "bottom",
+        legend.key.size = unit(1.5, 'cm')
+        ) +
+        # panel.border = element_rect(fill = NA, color = "gray90")) +
+        # legend.position = c(0.8, 0.1)) +
+  labs(x = "")
+
+tiff(here("virus_organism_plot.tiff"), units="in", width=16, height=16, res=300)
+virus_org
+dev.off()
+
+ggsave(here("virus_organism_plot.png"), plot = virus_org, dpi = 300, units = "in", width = 16, height = 16)
+```
+</details>
 
 
 
