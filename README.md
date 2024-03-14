@@ -34,6 +34,7 @@ Viruses [ORGN] NOT Coronavirus [ORGN] NOT Human immunodeficiency virus 1 [ORGN] 
 5. Read BLAST at NCBI results and filter out non-virus sequences: `03 - BLAST at NCBI.R`
 6. tBLASTx on contig sequences passing filters from step using local database on CLC to determine aa identites
 7. Read tBLASTx results and filter: `04 - tBLASTx.R`
+8. Scripts 05 - 09 are to produce tables, figures and summaries for publications and supervisors
 
 # Non-Virus Sequences
 
