@@ -1,6 +1,203 @@
 # Mosquito Metagenomics
 
-Code and workflow for analyzing, summarizing, and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files.
+Code and workflow for analyzing, summarizing, visualizing and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files.
+
+# Figures
+<details>
+  <summary>Click to view code</summary>
+
+```r
+virus_master_2023 <- read_csv(here("Data/tblastx_master.csv"))
+
+# KNOWN VIRUSES
+
+venn <- virus_master_2023 %>% 
+  filter(novel_flag == "Not Novel") %>% 
+  separate_wider_delim(cols = mosquito_species, names = c("genus", "species"), delim = " ") %>% 
+  distinct(virus_name, genus, .keep_all = TRUE) %>% 
+  group_by(virus_name, genus) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  complete(virus_name, genus, fill = list(n = 0)) %>% 
+  pivot_wider(names_from = "genus", values_from = "n") %>% 
+  mutate(across(c("Aedes", "Coquillettidia", "Culex", "Ochlerotatus"),
+                ~ as.character(.))) %>%
+
+  mutate(across(c("Aedes", "Coquillettidia", "Culex", "Ochlerotatus"), 
+                ~ case_when(. == "1" ~ virus_name,
+                            TRUE ~ NA_character_))) %>% 
+  select(-1)
+  
+
+aedes_venn <- venn %>%
+  select("Aedes") %>%
+  drop_na()
+
+culex_venn <- venn %>%
+  select("Culex") %>%
+  drop_na()
+
+coquillettidia_venn <- venn %>%
+  select("Coquillettidia") %>%
+  drop_na()
+
+# anopheles_venn <- venn %>%
+#   select("Anopheles") %>%
+#   drop_na()
+
+ochlerotatus_venn <- venn %>%
+  select("Ochlerotatus") %>%
+  drop_na()
+
+venn_map <- map(c(aedes_venn, culex_venn, coquillettidia_venn, ochlerotatus_venn), unique)
+
+
+venn_data <- Venn(venn_map)
+
+data <- process_data(venn_data)
+
+data_range_known <- venn_regionedge(process_data(venn_data))
+
+
+venn_diagram_known <- ggplot() +
+  # 1. region count layer
+  geom_polygon(aes(X, Y, fill = count, group = id), 
+               data = venn_regionedge(data)) +
+  # 2. set edge layer
+  geom_path(aes(X, Y, color = id, group = id), 
+            data = venn_setedge(data), 
+            show.legend = FALSE) +
+  # 3. set label layer
+  geom_text(aes(X, Y, label = name), 
+            data = venn_setlabel(data),
+            fontface = "bold.italic",
+            size = 5,
+            nudge_x = -0.01) +
+  # 4. region label layer
+  geom_label(aes(X, Y, label = count), 
+             data = venn_regionlabel(data),
+             fontface = "bold",
+             size = 7) +
+  coord_equal() +
+  theme_void() +
+  theme(
+    # legend.title = element_text(size = 15),
+    # legend.text = element_text(size = 13),
+    plot.title = element_text(size = 20, face = "bold")
+  ) +
+  # scale_fill_viridis_c("Number of Viruses") +
+  labs(title = "A) Known Viruses")
+
+
+tiff(here("virus_venn_diagram.tiff"), units="in", width=18, height=10, res=300)
+venn_diagram
+dev.off()
+
+
+#  NOVEL VIRUSES ----
+
+
+venn <- virus_master_2023 %>% 
+  filter(novel_flag == "Presumptive Novel") %>% 
+  separate_wider_delim(cols = mosquito_species, names = c("genus", "species"), delim = " ") %>% 
+  distinct(virus_name, genus, .keep_all = TRUE) %>% 
+  group_by(virus_name, genus) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  complete(virus_name, genus, fill = list(n = 0)) %>% 
+  pivot_wider(names_from = "genus", values_from = "n") %>% 
+  mutate(across(c("Aedes", "Anopheles", "Coquillettidia", "Culex", "Ochlerotatus"),
+                ~ as.character(.))) %>%
+  
+  mutate(across(c("Aedes", "Anopheles", "Coquillettidia", "Culex", "Ochlerotatus"), 
+                ~ case_when(. == "1" ~ virus_name,
+                            TRUE ~ NA_character_))) %>% 
+  select(-1)
+
+
+aedes_venn_novel <- venn %>%
+  select("Aedes") %>%
+  drop_na()
+
+culex_venn_novel <- venn %>%
+  select("Culex") %>%
+  drop_na()
+
+coquillettidia_venn_novel <- venn %>%
+  select("Coquillettidia") %>%
+  drop_na()
+
+anopheles_venn_novel <- venn %>%
+  select("Anopheles") %>%
+  drop_na()
+
+ochlerotatus_venn_novel <- venn %>%
+  select("Ochlerotatus") %>%
+  drop_na()
+
+venn_map <- map(c(aedes_venn_novel, culex_venn_novel, anopheles_venn_novel, 
+                  coquillettidia_venn_novel, ochlerotatus_venn_novel), unique)
+
+
+venn_data <- Venn(venn_map)
+
+data <- process_data(venn_data)
+
+data_range_novel <- venn_regionedge(process_data(venn_data))
+
+
+venn_diagram_novel <- ggplot() +
+  # 1. region count layer
+  geom_polygon(aes(X, Y, fill = count, group = id), 
+               data = venn_regionedge(data)) +
+  # 2. set edge layer
+  geom_path(aes(X, Y, color = id, group = id), 
+            data = venn_setedge(data), 
+            show.legend = FALSE) +
+  # 3. set label layer
+  geom_text(aes(X, Y, label = name), 
+            data = venn_setlabel(data),
+            fontface = "bold.italic",
+            size = 5) +
+  # 4. region label layer
+  geom_label(aes(X, Y, label = count), 
+             data = venn_regionlabel(data),
+             fontface = "bold",
+             size = 7) +
+  coord_equal() +
+  theme_void() +
+  theme(
+    # legend.title = element_text(size = 15),
+    # legend.text = element_text(size = 13),
+    plot.title = element_text(size = 20, face = "bold")
+  ) +
+  # scale_fill_viridis_c("Number of Viruses") +
+  labs(title = "B) Novel Viruses")
+
+# Combine venn diagrams 
+
+library(patchwork)
+
+(venn_diagram_known + venn_diagram_novel) +
+  plot_layout(guides = "collect") &
+  scale_fill_viridis_c("Number of Viruses", limits = range(c(data_range_novel$count, data_range_known$count))) &
+  theme(
+    legend.title = element_text(size = 15, vjust = 0.75),
+    legend.text = element_text(size = 13),
+    legend.position = "bottom"
+  ) 
+
+ggsave("Combined_Virus_Venn_Diagram_Mar2024.png", plot = last_plot(), width=18, height=10)
+```
+</details>
+
+<figure>
+  <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/f1762075-8f07-425b-b6d3-61f5aabb91a6" alt="Combined_Virus_Venn_Diagram_Mar2024">
+  <figcaption>Figure 1: Venn Diagram depicting the number of unique viruses identified in each mosquito genus separated by known viruses (A) which have been previously reported and novel viruses (B) which we newly identified.</figcaption>
+</figure>
+
+
+
 
 # Links to Files
 
