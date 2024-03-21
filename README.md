@@ -14,7 +14,178 @@ Code and workflow for analyzing, summarizing, visualizing and tabulating mosquit
 
 [Click here to view known viruses table](https://colebaril.github.io/Mosquito_Metagenomics/Tables/NON-NOVEL_reads_contigs_summary.html)
 
+<details>
+  <summary>Click to view code</summary>
+  
+  ```r
+virus_master_2023 <- read_csv(here("Data/tblastx_master.csv"))
+
+library_summary <- virus_master_2023 %>%
+  filter(novel_flag != "Presumptive Novel") %>% 
+  group_by(mosquito_species, sample_number) %>%
+  summarise(n = n_distinct(mosquito_species)) %>%
+  group_by(mosquito_species) %>%
+  summarise(n = n()) %>%
+  adorn_totals()
+
+
+
+years <- virus_master_2023 %>% 
+  filter(novel_flag != "Presumptive Novel") %>%
+  group_by(collection_year, virus_name) %>% 
+  summarise(count = n_distinct(virus_name, collection_year)) %>% 
+  pivot_wider(names_from = collection_year, values_from = count, values_fill = 0)
+
+
+virus_lineage <- virus_master_2023 %>% 
+  filter(novel_flag != "Presumptive Novel") %>%
+  group_by(virus_name, viral_family, genome) %>% 
+  summarise(n = n_distinct(virus_name, viral_family, genome)) %>% 
+  select(-"n")
+
+virus_master_2023 %>% 
+  filter(novel_flag != "Presumptive Novel") %>%
+  group_by(virus_name) %>% 
+  summarise(n_contigs = n(),
+            mean_cov = mean(coverage),
+            min_cov = min(coverage),
+            max_cov = max(coverage),
+            mean_pid = mean(greatest_identity_percent),
+            med_pid = median(greatest_identity_percent),
+            min_pid = min(greatest_identity_percent),
+            max_pid = max(greatest_identity_percent),
+            total_reads = sum(total_read_count),
+            longest_contig = max(contig_length)) %>% 
+  left_join(virus_lineage, by = "virus_name") %>% 
+  group_by(genome, viral_family) %>% 
+  arrange(genome, viral_family) %>% 
+  relocate(total_reads, .after = "n_contigs") %>% 
+  relocate(longest_contig, .after = "n_contigs") %>% 
+  gt() %>% 
+  fmt_number(columns = mean_cov:max_pid,
+             decimals = 2) %>% 
+  fmt_number(columns = total_reads,
+             sep_mark = ",",
+             decimals = 0) %>% 
+  tab_spanner(label = "Coverage Depth", columns = c(mean_cov, min_cov, max_cov)) %>% 
+  tab_spanner(label = "aa Percent Identity", columns = c(mean_pid, min_pid, max_pid, med_pid)) %>% 
+  cols_label(
+    n_contigs = "Contigs",
+    longest_contig = "Longest Contig (nt)",
+    total_reads = "Reads",
+    mean_cov = "Mean", min_cov = "Min", max_cov = "Max",
+    mean_pid = "Mean", min_pid = "Min", max_pid = "Max", med_pid = "Median",
+    virus_name = "Virus") %>% 
+  tab_style(
+    style = list(cell_fill(color = "grey"),
+                 cell_text(weight = "bold")),
+    locations = cells_row_groups(groups = everything())
+  ) %>% 
+  tab_style(
+    style = cell_borders(
+      sides = "left",
+      weight = px(2),
+      color = "grey"),
+    locations = cells_body(
+      columns = c(mean_cov, mean_pid, "n_contigs")
+    )
+  ) %>% 
+  data_color(
+    columns = mean_pid:max_pid,
+    palette = "viridis"
+    
+  )  %>% 
+  gtsave(filename = "Figures/NON-NOVEL_reads_contigs_summary.html")
+  ```
+  
+</details>
+
 [Click here to view novel viruses table](https://colebaril.github.io/Mosquito_Metagenomics/Tables/NOVEL_reads_contigs_summary.html)
+
+<details>
+  <summary>Click to view code</summary>
+  
+```r
+virus_master_2023 <- read_csv(here("Data/tblastx_master.csv"))
+
+library_summary <- virus_master_2023 %>%
+  filter(novel_flag == "Presumptive Novel") %>% 
+  group_by(mosquito_species, sample_number) %>%
+  summarise(n = n_distinct(mosquito_species)) %>%
+  group_by(mosquito_species) %>%
+  summarise(n = n()) %>%
+  adorn_totals()
+
+
+
+years <- virus_master_2023 %>% 
+  filter(novel_flag == "Presumptive Novel") %>% 
+  group_by(collection_year, virus_name) %>% 
+  summarise(count = n_distinct(virus_name, collection_year)) %>% 
+  pivot_wider(names_from = collection_year, values_from = count, values_fill = 0)
+
+
+virus_lineage <- virus_master_2023 %>% 
+  filter(novel_flag == "Presumptive Novel") %>% 
+  group_by(virus_name, viral_family, genome) %>% 
+  summarise(n = n_distinct(virus_name, viral_family, genome)) %>% 
+  select(-"n")
+
+virus_master_2023 %>% 
+  filter(novel_flag == "Presumptive Novel") %>% 
+  group_by(virus_name) %>% 
+  summarise(n_contigs = n(),
+            mean_cov = mean(coverage),
+            min_cov = min(coverage),
+            max_cov = max(coverage),
+            mean_pid = mean(greatest_identity_percent),
+            med_pid = median(greatest_identity_percent),
+            min_pid = min(greatest_identity_percent),
+            max_pid = max(greatest_identity_percent),
+            total_reads = sum(total_read_count),
+            longest_contig = max(contig_length)) %>% 
+  left_join(virus_lineage, by = "virus_name") %>% 
+  group_by(genome, viral_family) %>% 
+  arrange(genome, viral_family) %>% 
+  relocate(total_reads, .after = "n_contigs") %>% 
+  relocate(longest_contig, .after = "n_contigs") %>% 
+  gt() %>% 
+  fmt_number(columns = mean_cov:max_pid,
+             decimals = 2) %>% 
+  fmt_number(columns = total_reads,
+             sep_mark = ",",
+             decimals = 0) %>% 
+  tab_spanner(label = "Coverage Depth", columns = c(mean_cov, min_cov, max_cov)) %>% 
+  tab_spanner(label = "aa Percent Identity", columns = c(mean_pid, min_pid, max_pid, med_pid)) %>% 
+  cols_label(
+    n_contigs = "Contigs",
+    longest_contig = "Longest Contig (nt)",
+    total_reads = "Reads",
+    mean_cov = "Mean", min_cov = "Min", max_cov = "Max",
+    mean_pid = "Mean", min_pid = "Min", max_pid = "Max", med_pid = "Median",
+    virus_name = "Virus") %>% 
+  tab_style(
+    style = list(cell_fill(color = "grey"),
+                 cell_text(weight = "bold")),
+    locations = cells_row_groups(groups = everything())
+  ) %>% 
+  tab_style(
+    style = cell_borders(
+      sides = "left",
+      weight = px(2),
+      color = "grey"),
+    locations = cells_body(
+      columns = c(mean_cov, mean_pid, "n_contigs")
+    )
+  ) %>% 
+  data_color(
+    columns = mean_pid:max_pid,
+    palette = "viridis"
+    
+  )  %>% 
+  gtsave(filename = "Figures/NOVEL_reads_contigs_summary.html")
+```
+</details>
 
 # Figures
 
