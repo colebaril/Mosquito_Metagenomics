@@ -10,17 +10,62 @@ Code and workflow for analyzing, summarizing, visualizing and tabulating mosquit
 
 
 
-
-
-
-
-
 # Figures
 
+<figure>
+  <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/490da9d7-d755-462c-8636-e690f4f906df" alt="Reads Metadata">
+  <figcaption>Figure 1: Metadata statistics for each sequencing library (horizontal line).
+Each library consists of mosquitoes pooled by year, location, and species. Libraries are
+represented by three icons; total number of reads (left), number of reads after quality filtering
+(middle), and number reads non-host reads (right). Also labelled for each library is the number of
+mosquito specimens comprising each RNA pool. Reads are displayed in log form.</figcaption>
+</figure>
+
+<details>
+  <summary>Click to view code</summary>
+
+  ```r
+metadata <- read_csv(here("Data/metadata_cleaned.csv"))
+metadata_plot <- metadata %>% 
+  ggplot(aes(x = total_reads_log, y = reorder(id, total_reads_log))) + 
+  geom_segment(aes(x = number_reads_passing_host_filters_log, xend = total_reads_log, yend = id),
+               col = "black", linewidth = 1) +
+  geom_point(aes(colour = species, shape = year, size = 1.2)) +
+  geom_point(aes(x = number_reads_passing_qc_log, colour = species, shape = year, size = 1.2)) +
+  geom_point(aes(x = number_reads_passing_host_filters_log, colour = species, shape = year, size = 1.2)) +
+  
+  geom_text(aes(label = number_in_pool), hjust = 1.5, size = 4.5) +
+  theme_bw() +
+  scale_x_reverse() +
+  scale_colour_viridis_d("Species", labels = c("*Ae. canadensis*", "*Ae. vexans*", "*An. earlei*", "*Cq. perturbans*", 
+                                               "*Cx. tarsalis*", "*Oc. dorsalis*", "*Oc. flavescens*", "*Oc. triseriatus*")) +
+  scale_shape_manual("Year", values = c(15, 17, 18, 19)) +
+  theme(panel.grid.major.x  = element_blank(),
+        panel.grid.minor.x  = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(size = 14),
+       
+        legend.title = element_text(size = 18, face = "bold"),
+
+        # legend.key.size = unit(1.5, 'cm'),
+        legend.text = element_markdown(size = 18),
+        axis.text.y = element_blank(),
+        axis.title.x = element_text(size = 15),
+        axis.ticks.y = element_blank(),
+        legend.position = c(0.90, 0.3),
+        legend.background = element_rect(linetype = 2, linewidth = 0.5, colour = 1)) +
+  guides(colour = guide_legend(override.aes = list(size = 5)),
+         shape = guide_legend(override.aes = list(size = 5)),
+         size = "none") +
+  labs(x = "Total Reads (Log 10)",
+       y = "")
+```
+</details>
 
 <figure>
   <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/f1762075-8f07-425b-b6d3-61f5aabb91a6" alt="Combined_Virus_Venn_Diagram_Mar2024">
-  <figcaption>Figure 1: Venn Diagram depicting the number of unique viruses identified in each mosquito genus separated by known viruses (A) which have been previously reported and novel viruses (B) which we newly identified.</figcaption>
+  <figcaption>Figure 2: Venn Diagram depicting the number of unique viruses identified in each mosquito genus separated by known viruses (A) which have been previously reported and novel viruses (B) which we newly identified.</figcaption>
 </figure>
 
 <details>
@@ -216,7 +261,7 @@ ggsave("Combined_Virus_Venn_Diagram_Mar2024.png", plot = last_plot(), width=18, 
 
 <figure>
   <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/c11fec09-5867-4147-8fa8-25070553b89b" alt="Viruses Plot">
-  <figcaption>Figure 2: Faceted bar plot displaying the number of unique viruses identified (y-axis) in each mosquito species. The total number of viruses identified in a mosquito species and the number of sequencing libraries representing each mosquito species is displayed at the top of each facet. Viral family is shown on the x-axis and bars are coloured based on genome type of the family. The number of novel viruses is indicated by hash marks.</figcaption>
+  <figcaption>Figure 3: Faceted bar plot displaying the number of unique viruses identified (y-axis) in each mosquito species. The total number of viruses identified in a mosquito species and the number of sequencing libraries representing each mosquito species is displayed at the top of each facet. Viral family is shown on the x-axis and bars are coloured based on genome type of the family. The number of novel viruses is indicated by hash marks.</figcaption>
 </figure>
 <details>
   <summary>Click to view code</summary>
