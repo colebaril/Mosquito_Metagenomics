@@ -189,6 +189,8 @@ virus_master_2023 %>%
 
 # Figures
 
+## Metadata
+
 <figure>
   <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/490da9d7-d755-462c-8636-e690f4f906df" alt="Reads Metadata">
   <figcaption>Figure 1: Metadata statistics for each sequencing library (horizontal line).
@@ -239,6 +241,8 @@ metadata_plot <- metadata %>%
        y = "")
 ```
 </details>
+
+## Venn Diagram
 
 <figure>
   <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/f1762075-8f07-425b-b6d3-61f5aabb91a6" alt="Combined_Virus_Venn_Diagram_Mar2024">
@@ -435,6 +439,8 @@ library(patchwork)
 ggsave("Combined_Virus_Venn_Diagram_Mar2024.png", plot = last_plot(), width=18, height=10)
 ```
 </details>
+
+## Viral Organism Bar Plot
 
 <figure>
   <img src="https://github.com/colebaril/Mosquito_Metagenomics/assets/110275137/c11fec09-5867-4147-8fa8-25070553b89b" alt="Viruses Plot">
