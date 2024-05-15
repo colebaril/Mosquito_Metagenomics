@@ -8,7 +8,7 @@ Published as a preprint with BioRxiv:
 
 Cole Baril, Bryan J. Cassone. Metatranscriptomic analysis of common mosquito vector species in the Canadian Prairies. *bioRxiv* 2023.08.15.553461; doi: https://doi.org/10.1101/2023.08.15.553461
 
-This repository contains code and workflow for analyzing, summarizing, visualizing and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files.
+This repository contains code and workflows for analyzing, summarizing, visualizing and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files. This repository also contains links to raw files and publication quality figures. 
 
 
 # Tables
