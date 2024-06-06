@@ -1,6 +1,6 @@
 # Mosquito Metagenomics
 
-![](https://img.shields.io/badge/Status%20Accepted-green)
+![](https://img.shields.io/badge/Status-Accepted-brightgreen)
 
 Submitted to _mSphere_ in May 2024. Accepted; awaiting publication.
 
