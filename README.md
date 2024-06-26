@@ -1,12 +1,12 @@
 # Mosquito Metagenomics
 
-![](https://img.shields.io/badge/Status-Accepted-brightgreen)
+![](https://img.shields.io/badge/Status-Published-brightgreen)
 
 Submitted to _mSphere_ in May 2024. Accepted; awaiting publication.
 
 Published as a preprint with BioRxiv:
 
-Cole Baril, Bryan J. Cassone. Metatranscriptomic analysis of common mosquito vector species in the Canadian Prairies. *bioRxiv* 2023.08.15.553461; doi: https://doi.org/10.1101/2023.08.15.553461
+Baril C, Cassone BJ. Metatranscriptomic analysis of common mosquito vector species in the Canadian Prairies. _mSphere0:e00203-24_. https://doi.org/10.1128/msphere.00203-24
 
 This repository contains code and workflows for analyzing, summarizing, visualizing and tabulating mosquito metagenomics CLC Genomics Workbench BLAST results files. This repository also contains links to raw files and publication quality figures. 
 
