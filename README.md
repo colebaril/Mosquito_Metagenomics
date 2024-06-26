@@ -2,9 +2,7 @@
 
 ![](https://img.shields.io/badge/Status-Published-brightgreen)
 
-Submitted to _mSphere_ in May 2024. Accepted; awaiting publication.
-
-Published as a preprint with BioRxiv:
+Published in _mSphere_ in June 2024.
 
 Baril C, Cassone BJ. Metatranscriptomic analysis of common mosquito vector species in the Canadian Prairies. _mSphere0:e00203-24_. https://doi.org/10.1128/msphere.00203-24
 
